@@ -9,28 +9,32 @@ import UIKit
 import Combine
 
 protocol RMCharacterListDelegate: AnyObject {
-    func initialAPICall()
-    func loadMoreCharacters()
+    func didSelectCharacter(_ character: RMCharacter)
+    func didLoadInitialCharacters()
+    func didLoadMoreCharacters()
 }
 
 
 /// Contoller to show and search characters
-final class RMCharacterViewController: UIViewController, RMCharacterListDelegate {
+final class RMCharacterViewController: UIViewController, RMCharacterListDelegate, RMCharacterListViewDelegate {
     
-
+    
+    
     private let viewModel = RMViewModel()
     private let loadingView = LoadingView()
     private let characterListView = RMCharacterListView()
     private var cancellables = Set<AnyCancellable>()
+    private var isCurrentLoadMore = false
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "Characters"
         setupUI()
         bindViewModel()
+        didLoadInitialCharacters()
     }
     private func setupUI(){
-        
+        characterListView.delegate = self
         characterListView.translatesAutoresizingMaskIntoConstraints = false
         loadingView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -52,7 +56,6 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
                 self?.handleState(state)
             }
             .store(in: &cancellables)
-            
     }
     
     private func handleState(_ state: RMDataWrapper<[RMCharacter]>){
@@ -65,6 +68,7 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
         case .success:
             loadingView.hide()
             characterListView.updateCharacters(state.data ?? [])
+            characterListView.updateShouldLoadMore(viewModel.isLoadMore)
             break
         case .noData(_):
             loadingView.hide()
@@ -77,13 +81,44 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
         }
     }
     
-    func initialAPICall() {
-        viewModel.getAllCharacters()
+    //RMCharacterListViewDelegate
+    func didSelectCharacter(_ characterListView: RMCharacterListView, selectedCharacter character: RMCharacter) {
+        didSelectCharacter(character)
+    }
+    func didScroll(_ scrollView: UIScrollView) {
+
+        // !isCurrentLoadMore is to prevent loadMoreCharacter Api call excessively
+
+//        guard !viewModel.isLoadMore,/* !isCurrentLoadMore,*/
+//              let nextUrlString = viewModel.characterInfo?.next else{
+//            return
+//        }
+        let offset = scrollView.contentOffset.y
+        let totalContentHeight = scrollView.contentSize.height
+        let totalScrollViewFixedHeight = scrollView.frame.size.height
+        print("Offset: \(offset)")
+        print("totalContentHeight: \(totalContentHeight)")
+        print("totalScrollViewFixedHeight: \(totalScrollViewFixedHeight)")
+        if offset >= (totalContentHeight - totalScrollViewFixedHeight){
+            
+            didLoadMoreCharacters()
+        }
+    }
+    //RMCharacterListDelegate
+    func didSelectCharacter(_ character: RMCharacter) {
+        let detailVC = RMCharacterDetailViewController(character: character)
+        detailVC.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(detailVC, animated: true)
+
     }
     
-    func loadMoreCharacters() {
-        
+    func didLoadInitialCharacters() {
+        viewModel.getInitialCharacters()
     }
-
-  
+    
+    func didLoadMoreCharacters() {
+        isCurrentLoadMore = true
+        viewModel.getMoreCharacters()
+    }
+    
 }
