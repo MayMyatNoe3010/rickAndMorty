@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 final class RMCharacterItemCell: UICollectionViewCell{
     static let cellIdentifier = "RMCharacterItemCell"
     var character: RMCharacter?
@@ -52,13 +53,14 @@ final class RMCharacterItemCell: UICollectionViewCell{
         }
     }
     private func loadImage(_ url: URL){
-        DispatchQueue.global().async{
-            if let data = try? Data(contentsOf: url), let image = UIImage(data: data){
-                DispatchQueue.main.async {
-                    self.imageView.image = image
-                }
-            }
-        }
+        self.imageView.kf.setImage(
+            with: url,
+            options: [
+                .processor(RoundCornerImageProcessor(cornerRadius: 20)), // Rounded corners
+                .transition(.fade(0.2)), // Smooth fade-in effect
+                .cacheOriginalImage // Ensures caching works properly
+            ]
+        )
     }
     
     private func addConstraints(){

@@ -9,26 +9,21 @@ import Foundation
 class BaseViewModel: ObservableObject{
     func executeServiceCall<T : Codable, RMModel: Codable>(
         serviceCall: @escaping () async throws -> T,
-        onStateChanged: @escaping (RMDataWrapper<RMModel>) -> Void,
-        mapResponse: @escaping (T) -> RMModel,
+        onStateChanged: @escaping (RMDataWrapper<RMModel>, Info?) -> Void,
+        mapResponse: @escaping (T) -> (RMModel, Info?),
         loadingMessage: String = "Loading...",
         errorMessage: String = "Something went wrong"
     ) async{
-        onStateChanged(RMDataWrapper.loading(loadingMessage))
+        onStateChanged(RMDataWrapper.loading(loadingMessage), nil)
         
-        do{
-            let result: T? = try await serviceCall()
-            if let result = result{
-                let mappedData = mapResponse(result)
-                onStateChanged(RMDataWrapper.success(mappedData))
-            } else{
-                onStateChanged(RMDataWrapper.error(errorMessage))
+        do {
+            let result = try await serviceCall()
+            let (mappedData, info) = mapResponse(result)
+            onStateChanged(RMDataWrapper.success(mappedData), info) // Success state
+            } catch {
+            onStateChanged(RMDataWrapper.error(error.localizedDescription.isEmpty ? errorMessage : error.localizedDescription), nil) // Error state
             }
-        }
-            catch let error{
-                onStateChanged(RMDataWrapper.error(error.localizedDescription))
-            }
-        
+
     }
     
     func fetchData<T : Codable>(request: RMRequest, expecting: T.Type)async throws -> T?{

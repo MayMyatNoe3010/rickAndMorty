@@ -11,8 +11,10 @@
 		CE0D4BF22D6F797D00CF1875 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0D4BF12D6F797D00CF1875 /* LoadingView.swift */; };
 		CE0D4BF42D6F7B3000CF1875 /* RMCharacterItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0D4BF32D6F7B3000CF1875 /* RMCharacterItemCell.swift */; };
 		CE0D4BF62D6FD87000CF1875 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0D4BF52D6FD87000CF1875 /* Extensions.swift */; };
+		CE0D64C62D7DAB7300AEA1C7 /* RMCharacterDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0D64C52D7DAB7300AEA1C7 /* RMCharacterDetailViewController.swift */; };
+		CE0D64C82D7E9C5C00AEA1C7 /* FooterLoadingCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0D64C72D7E9C5C00AEA1C7 /* FooterLoadingCollectionReusableView.swift */; };
+		CE57682C2D8A3F3000240FF8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = CE57682B2D8A3F3000240FF8 /* Kingfisher */; };
 		CE7D65962D6CD2A40085CCA7 /* RMGetAllCharactersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7D65952D6CD2A40085CCA7 /* RMGetAllCharactersResponse.swift */; };
-		CE9C9CF02D78B771007B46BA /* RMCharacterListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9C9CEF2D78B771007B46BA /* RMCharacterListDataSource.swift */; };
 		CEA530A92D7454CD0062BB5D /* RMViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA530A82D7454CD0062BB5D /* RMViewModel.swift */; };
 		CEA530AB2D7458ED0062BB5D /* RMDataWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA530AA2D7458ED0062BB5D /* RMDataWrapper.swift */; };
 		CEA530AD2D7465EB0062BB5D /* BaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA530AC2D7465EB0062BB5D /* BaseViewModel.swift */; };
@@ -42,8 +44,9 @@
 		CE0D4BF12D6F797D00CF1875 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		CE0D4BF32D6F7B3000CF1875 /* RMCharacterItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMCharacterItemCell.swift; sourceTree = "<group>"; };
 		CE0D4BF52D6FD87000CF1875 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		CE0D64C52D7DAB7300AEA1C7 /* RMCharacterDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMCharacterDetailViewController.swift; sourceTree = "<group>"; };
+		CE0D64C72D7E9C5C00AEA1C7 /* FooterLoadingCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterLoadingCollectionReusableView.swift; sourceTree = "<group>"; };
 		CE7D65952D6CD2A40085CCA7 /* RMGetAllCharactersResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMGetAllCharactersResponse.swift; sourceTree = "<group>"; };
-		CE9C9CEF2D78B771007B46BA /* RMCharacterListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMCharacterListDataSource.swift; sourceTree = "<group>"; };
 		CEA530A82D7454CD0062BB5D /* RMViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMViewModel.swift; sourceTree = "<group>"; };
 		CEA530AA2D7458ED0062BB5D /* RMDataWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMDataWrapper.swift; sourceTree = "<group>"; };
 		CEA530AC2D7465EB0062BB5D /* BaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewModel.swift; sourceTree = "<group>"; };
@@ -75,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE57682C2D8A3F3000240FF8 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,7 +90,6 @@
 			children = (
 				CE0D4BEE2D6F6DBA00CF1875 /* RMCharacterListView.swift */,
 				CE0D4BF32D6F7B3000CF1875 /* RMCharacterItemCell.swift */,
-				CE9C9CEF2D78B771007B46BA /* RMCharacterListDataSource.swift */,
 			);
 			path = Character;
 			sourceTree = "<group>";
@@ -95,6 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				CE0D4BF12D6F797D00CF1875 /* LoadingView.swift */,
+				CE0D64C72D7E9C5C00AEA1C7 /* FooterLoadingCollectionReusableView.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -166,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				CED0D1052D6B38E900B9A3AC /* Core */,
+				CE0D64C52D7DAB7300AEA1C7 /* RMCharacterDetailViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -245,6 +250,9 @@
 			dependencies = (
 			);
 			name = RickAndMorty;
+			packageProductDependencies = (
+				CE57682B2D8A3F3000240FF8 /* Kingfisher */,
+			);
 			productName = RickAndMorty;
 			productReference = CED0D0E72D6B28C400B9A3AC /* RickAndMorty.app */;
 			productType = "com.apple.product-type.application";
@@ -273,6 +281,9 @@
 				Base,
 			);
 			mainGroup = CED0D0DE2D6B28C400B9A3AC;
+			packageReferences = (
+				CE57682A2D8A3F3000240FF8 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			productRefGroup = CED0D0E82D6B28C400B9A3AC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -310,7 +321,6 @@
 				CED0D1152D6B3A4200B9A3AC /* RMEpisode.swift in Sources */,
 				CED0D10B2D6B398E00B9A3AC /* RMLocationViewController.swift in Sources */,
 				CE0D4BEF2D6F6DBA00CF1875 /* RMCharacterListView.swift in Sources */,
-				CE9C9CF02D78B771007B46BA /* RMCharacterListDataSource.swift in Sources */,
 				CE0D4BF62D6FD87000CF1875 /* Extensions.swift in Sources */,
 				CED0D0EF2D6B28C400B9A3AC /* RMTabViewController.swift in Sources */,
 				CED0D1132D6B3A3400B9A3AC /* RMLocation.swift in Sources */,
@@ -319,7 +329,9 @@
 				CED0D1172D6B49D600B9A3AC /* RMService.swift in Sources */,
 				CEA530AB2D7458ED0062BB5D /* RMDataWrapper.swift in Sources */,
 				CE0D4BF22D6F797D00CF1875 /* LoadingView.swift in Sources */,
+				CE0D64C82D7E9C5C00AEA1C7 /* FooterLoadingCollectionReusableView.swift in Sources */,
 				CED0D0EB2D6B28C400B9A3AC /* AppDelegate.swift in Sources */,
+				CE0D64C62D7DAB7300AEA1C7 /* RMCharacterDetailViewController.swift in Sources */,
 				CED0D1232D6B5CCD00B9A3AC /* RMSingleLocation.swift in Sources */,
 				CED0D11F2D6B5C7400B9A3AC /* RMCharacterGender.swift in Sources */,
 				CED0D10F2D6B39FC00B9A3AC /* RMSettingsViewController.swift in Sources */,
@@ -537,6 +549,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE57682A2D8A3F3000240FF8 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE57682B2D8A3F3000240FF8 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE57682A2D8A3F3000240FF8 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CED0D0DF2D6B28C400B9A3AC /* Project object */;
 }
