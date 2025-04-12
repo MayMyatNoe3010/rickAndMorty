@@ -31,7 +31,6 @@ final class RMService{
             completion(.failure(RMServiceError.failedToCreateRequest))
             return
         }
-        print("here 1")
         
         let task = URLSession.shared.dataTask(with: urlRequest) { [weak self] data, _, error in
             guard let data = data, error == nil else {

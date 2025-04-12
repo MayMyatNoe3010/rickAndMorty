@@ -20,7 +20,7 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
     
     
     
-    private let viewModel = RMViewModel()
+    private let viewModel = RMCharacterViewModel()
     private let loadingView = LoadingView()
     private let characterListView = RMCharacterListView()
     private var cancellables = Set<AnyCancellable>()
@@ -106,7 +106,7 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
     }
     //RMCharacterListDelegate
     func didSelectCharacter(_ character: RMCharacter) {
-        let detailVC = RMCharacterDetailViewController(character: character)
+        let detailVC = RMCharacterDetailViewController(character: character, viewModel: viewModel)
         detailVC.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(detailVC, animated: true)
 
