@@ -15,3 +15,12 @@ struct RMEpisode: Codable {
     let url: String
     let created: String
 }
+
+protocol RMEpisodeDataRender {
+    var name: String { get }
+    var air_date: String { get }
+    var episode: String { get }
+}
+extension RMEpisode: RMEpisodeDataRender {}
+
+

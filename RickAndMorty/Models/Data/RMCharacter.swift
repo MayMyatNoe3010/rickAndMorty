@@ -20,3 +20,13 @@ struct RMCharacter: Codable {
     let url: String
     let created: String
 }
+
+protocol RMCharacterDataRender{
+    var name: String{ get }
+    var status: RMCharacterStatus{ get }
+    var image: String{ get }
+}
+
+extension RMCharacter: RMCharacterDataRender{
+}
+

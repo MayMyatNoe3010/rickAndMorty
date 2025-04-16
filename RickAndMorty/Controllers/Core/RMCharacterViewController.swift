@@ -16,11 +16,11 @@ protocol RMCharacterListDelegate: AnyObject {
 
 
 /// Contoller to show and search characters
-final class RMCharacterViewController: UIViewController, RMCharacterListDelegate, RMCharacterListViewDelegate {
+final class RMCharacterViewController: BaseViewController, RMCharacterListDelegate, RMCharacterListViewDelegate {
     
     
     
-    private let viewModel = RMViewModel()
+    private let viewModel = RMCharacterViewModel()
     private let loadingView = LoadingView()
     private let characterListView = RMCharacterListView()
     private var cancellables = Set<AnyCancellable>()
@@ -58,16 +58,16 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
             .store(in: &cancellables)
     }
     
-    private func handleState(_ state: RMDataWrapper<[RMCharacter]>){
+    private func handleState(_ state: RMDataWrapper<[RMCharacter]?>){
         print("State: \(state.state)")
         switch state.state{
-
+            
         case .loading(_):
             loadingView.show()
             break
         case .success:
             loadingView.hide()
-            characterListView.updateCharacters(state.data ?? [])
+            characterListView.updateCharacters((state.data ?? []) ?? [])
             characterListView.updateShouldLoadMore(viewModel.isLoadMore)
             break
         case .noData(_):
@@ -86,30 +86,16 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
         didSelectCharacter(character)
     }
     func didScroll(_ scrollView: UIScrollView) {
-
-        // !isCurrentLoadMore is to prevent loadMoreCharacter Api call excessively
-
-//        guard !viewModel.isLoadMore,/* !isCurrentLoadMore,*/
-//              let nextUrlString = viewModel.characterInfo?.next else{
-//            return
-//        }
-        let offset = scrollView.contentOffset.y
-        let totalContentHeight = scrollView.contentSize.height
-        let totalScrollViewFixedHeight = scrollView.frame.size.height
-        print("Offset: \(offset)")
-        print("totalContentHeight: \(totalContentHeight)")
-        print("totalScrollViewFixedHeight: \(totalScrollViewFixedHeight)")
-        if offset >= (totalContentHeight - totalScrollViewFixedHeight){
-            
+        handleScrollView(scrollView: scrollView){
             didLoadMoreCharacters()
         }
     }
     //RMCharacterListDelegate
     func didSelectCharacter(_ character: RMCharacter) {
-        let detailVC = RMCharacterDetailViewController(character: character)
+        let detailVC = RMCharacterDetailViewController(character: character, viewModel: viewModel)
         detailVC.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(detailVC, animated: true)
-
+        
     }
     
     func didLoadInitialCharacters() {
@@ -117,7 +103,6 @@ final class RMCharacterViewController: UIViewController, RMCharacterListDelegate
     }
     
     func didLoadMoreCharacters() {
-        isCurrentLoadMore = true
         viewModel.getMoreCharacters()
     }
     
