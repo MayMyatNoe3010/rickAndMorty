@@ -3,7 +3,7 @@ import UIKit
 class RMCharacterDetailView: UIView {
     
     public var collectionView: UICollectionView?
-    private var sections: [SectionType] = []
+    private var sections: [RMCharacterSection] = []
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -29,7 +29,7 @@ class RMCharacterDetailView: UIView {
         addConstraints()
     }
     
-    func configure(with sections: [SectionType]) {
+    func configure(with sections: [RMCharacterSection]) {
         self.sections = sections
         collectionView?.reloadData()
     }
@@ -65,7 +65,7 @@ class RMCharacterDetailView: UIView {
         switch sections[sectionIndex] {
         case .photo:
             return createPhotoSectionLayout()
-        case .information:
+        case .characterInfo:
             return createInfoSectionLayout()
         case .episode:
             return createEpisodeSectionLayout()
@@ -133,8 +133,3 @@ class RMCharacterDetailView: UIView {
     }
 }
 
-enum SectionType {
-    case photo(image: String)
-    case information(data: [(type: RMType, value: String)])
-    case episode(episode: [ RMEpisodeDataRender])
-}

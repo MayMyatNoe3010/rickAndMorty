@@ -11,56 +11,17 @@ import Combine
 class RMEpisodeViewModel: BaseViewModel{
 
     @Published var episode: RMDataWrapper<RMEpisode> = RMDataWrapper.idle()
-    @Published var episodes: RMDataWrapper<[RMEpisode]> = RMDataWrapper.idle()
+    
+    @Published var allEpisodes: RMDataWrapper<[RMEpisode]?> = RMDataWrapper.idle()
+   
     private var cancellables = Set<AnyCancellable>()
-    private var episodeURL:String?
+    private let characterViewModel =  RMCharacterViewModel()
+    var episodeInfo: Info? = nil
     
-//    init(episodeURL: String? = nil) {
-//        super.init()
-//        self.episodeURL = episodeURL
-//        self.getEpisode()
-//    }
     
-    func fetchEpisodeDetails(episodeURLs: [String]) {
-        guard !episodeURLs.isEmpty else { return }
+    
 
-        Task {
-                await executeServiceCall(
-                    serviceCall: {
-                        try await withThrowingTaskGroup(of: RMEpisode?.self) { group in
-                            var episodes = [RMEpisode]()
-                            
-                            for urlString in episodeURLs {
-                                group.addTask {
-                                    guard let url = URL(string: urlString) else { return nil }
-                                    guard let request = RMRequest(url: url) else{return nil}
-                                    return try? await self.fetchData(request: request, expecting: RMEpisode.self)
-                                }
-                            }
-                            
-                            for try await episode in group {
-                                if let episode = episode {
-                                    episodes.append(episode)
-                                }
-                            }
-                            
-                            return episodes
-                        }
-                    },
-                    onStateChanged: { [weak self] state, _ in
-                        DispatchQueue.main.async {
-                            self?.episodes = state
-                        }
-                    },
-                    mapResponse: { episodes in
-                        return (episodes, nil)
-                    }
-                )
-            }
-
-    }
-
-    func getEpisode(){
+    func getEpisode(episodeURL: String?){
         guard let urlString = episodeURL, let url = URL(string: urlString), let request = RMRequest(url: url) else {
                     print("Invalid episode URL")
                     return
@@ -70,12 +31,83 @@ class RMEpisodeViewModel: BaseViewModel{
             await executeServiceCall(serviceCall: {
                 try await self.fetchData(request: request, expecting: RMEpisode.self)!
             }, onStateChanged: {[weak self] state, _ in
-                DispatchQueue.main.async {
+
                     self?.episode = state
-                }
+                
             }, mapResponse: { response in
                 return (response, nil)
             })
         }
     }
+    
+    public func getInitialEpisodes() {
+        Task {
+            await executeServiceCall(
+                serviceCall: {[weak self] () -> RMGetAllEpisodesResponse? in
+                    guard let self = self else { return nil }
+                    return try await self.fetchData(
+                        request: .listEpisodesRequest,
+                        expecting: RMGetAllEpisodesResponse.self
+                    )                },
+                onStateChanged: { [weak self] dataWrapper, info in
+
+                        self?.allEpisodes = dataWrapper
+                    
+                        self?.episodeInfo = info
+                    
+                },
+                mapResponse: { response in
+                    return (response?.results , response?.info)
+                },
+                loadingMessage: "Fetching episodes...",
+                errorMessage: "Failed to load episodes"
+            )
+        }
+    }
+    public func getMoreEpisodes(){
+        print("isLoadMore\(isLoadMore)")
+        guard isLoadMore else{
+            return
+        }
+        print("Next\(episodeInfo?.next)")
+        guard let nextUrlString = episodeInfo?.next,
+              let nextUrl = URL(string: nextUrlString) else {
+            return
+        }
+        
+        guard let request = RMRequest(url: nextUrl) else { return }
+        Task {
+            await executeServiceCall(
+                serviceCall: {
+                    try await self.fetchData(request: request, expecting: RMGetAllEpisodesResponse.self)!
+                },
+                onStateChanged: { [weak self] dataWrapper, info in
+                    //print("Daata: \(dataWrapper)")
+                    
+                        if let newEpisodes = dataWrapper.data {
+                            var existingEpisodes = self?.allEpisodes.data ?? []  // Get existing data or empty array
+                            existingEpisodes?.append(contentsOf: newEpisodes)  // Append new episodes
+                            
+                            self?.allEpisodes = RMDataWrapper.success(existingEpisodes)
+                        }
+                        print("Updaate:\(self?.allEpisodes.data??.count)")
+                        
+                        self?.episodeInfo = info
+                        
+                    
+                },
+                mapResponse: { response in
+                    return (response.results , response.info)
+                },
+                loadingMessage: "Fetching episodes...",
+                errorMessage: "Failed to load episodes"
+            )
+        }
+    }
+    public var isLoadMore: Bool{
+        return episodeInfo?.next != nil
+    }
+    
+    
+
 }

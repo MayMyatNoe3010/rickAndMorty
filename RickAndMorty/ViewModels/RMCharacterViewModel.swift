@@ -7,24 +7,28 @@
 
 import Foundation
 class RMCharacterViewModel: BaseViewModel{
-    @Published var allCharacters: RMDataWrapper<[RMCharacter]> = RMDataWrapper.idle()
+    @Published var allCharacters: RMDataWrapper<[RMCharacter]?> = RMDataWrapper.idle()
     var characterInfo: Info? = nil
-    @Published var characterDetail: RMDataWrapper<RMCharacter> = RMDataWrapper.idle()
-    @Published private(set) var characterDetailSections :[SectionType] = []
+    @Published var characterDetail: RMDataWrapper<RMCharacter?> = RMDataWrapper.idle()
+    @Published var characterBatchCalled: RMDataWrapper<[RMCharacter]?> = RMDataWrapper.idle()
+    @Published private(set) var characterDetailSections :[RMCharacterSection] = []
     public func getInitialCharacters() {
         Task {
             await executeServiceCall(
-                serviceCall: {
-                    try await self.fetchData(request: .listCharactersRequests, expecting: RMGetAllCharactersResponse.self)!
-                },
+                serviceCall: {[weak self] () -> RMGetAllCharactersResponse? in
+                    guard let self = self else { return nil }
+                    return try await self.fetchData(
+                        request: .listCharactersRequests,
+                        expecting: RMGetAllCharactersResponse.self
+                    )                },
                 onStateChanged: { [weak self] dataWrapper, info in
-                    DispatchQueue.main.async {
-                        self?.allCharacters = dataWrapper
-                        self?.characterInfo = info
-                    }
+                    
+                    self?.allCharacters = dataWrapper
+                    self?.characterInfo = info
+                    
                 },
                 mapResponse: { response in
-                    return (response.results , response.info)
+                    return (response?.results , response?.info)
                 },
                 loadingMessage: "Fetching characters...",
                 errorMessage: "Failed to load characters"
@@ -50,18 +54,18 @@ class RMCharacterViewModel: BaseViewModel{
                 },
                 onStateChanged: { [weak self] dataWrapper, info in
                     //print("Daata: \(dataWrapper)")
-                    DispatchQueue.main.async {
-                        if let newCharacters = dataWrapper.data {
-                            var existingCharacters = self?.allCharacters.data ?? []  // Get existing data or empty array
-                            existingCharacters.append(contentsOf: newCharacters)  // Append new characters
-                            
-                            self?.allCharacters = RMDataWrapper.success(existingCharacters)
-                        }
-                        print("Updaate:\(self?.allCharacters.data?.count)")
+                    
+                    if let newCharacters = dataWrapper.data {
+                        var existingCharacters = self?.allCharacters.data ?? []  // Get existing data or empty array
+                        existingCharacters?.append(contentsOf: newCharacters)  // Append new characters
                         
-                        self?.characterInfo = info
-                        
+                        self?.allCharacters = RMDataWrapper.success(existingCharacters)
                     }
+                    print("Updaate:\(self?.allCharacters.data??.count)")
+                    
+                    self?.characterInfo = info
+                    
+                    
                 },
                 mapResponse: { response in
                     return (response.results , response.info)
@@ -87,15 +91,32 @@ class RMCharacterViewModel: BaseViewModel{
             await executeServiceCall(serviceCall: {
                 try await self.fetchData(request: request, expecting: RMCharacter.self)!
             }, onStateChanged: {[weak self] dataWrapper, _ in
-                DispatchQueue.main.async {
-                    self?.characterDetail = dataWrapper
-                }
+                
+                self?.characterDetail = dataWrapper
+                
                 
             }, mapResponse: { response in
                 return (response, nil)
             })
         }
         
+    }
+    
+    func fetchCharacterGroupedURL(characterURLs: [String]){
+        guard !characterURLs.isEmpty else{ return }
+        Task{
+            await executeServiceCall(serviceCall: {
+                return try await self.fetchMultipleData(from: characterURLs){url in
+                    guard let request = RMRequest(url: url) else{return nil}
+                    return try? await self.fetchData(request: request, expecting: RMCharacter.self)
+                }
+            }, onStateChanged: {[weak self] state, _ in
+                self?.characterBatchCalled = state
+            }, mapResponse: { response in
+                return (response, nil)
+            }
+            )
+        }
     }
     
     

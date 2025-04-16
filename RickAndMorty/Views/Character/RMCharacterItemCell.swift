@@ -9,7 +9,7 @@ import UIKit
 import Kingfisher
 final class RMCharacterItemCell: UICollectionViewCell{
     static let cellIdentifier = "RMCharacterItemCell"
-    var character: RMCharacter?
+    var character: RMCharacterDataRender?
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -45,7 +45,7 @@ final class RMCharacterItemCell: UICollectionViewCell{
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func configure(with character: RMCharacter){
+    func configure(with character: RMCharacterDataRender){
         nameLabel.text = character.name
         statusLabel.text = character.status.rawValue
         if let imageURL = URL(string: character.image){

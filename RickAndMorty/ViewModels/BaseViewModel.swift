@@ -41,4 +41,25 @@ class BaseViewModel: ObservableObject{
             
         }
     }
+    
+    func fetchMultipleData<T: Codable>(from urlStrings: [String], using fetcher: @escaping (URL) async throws -> T?) async throws -> [T]{
+        try await withThrowingTaskGroup(of: T?.self){ group in
+            var results = [T]()
+            for urlString in urlStrings {
+                group.addTask{
+                    guard let url = URL(string: urlString) else{
+                        return nil
+                    }
+                    return try await fetcher(url)
+                }
+            }
+            for try await result in group{
+                if let item = result{
+                    results.append(item)
+                }
+            }
+          return results
+        }
+    }
+    
 }

@@ -15,10 +15,10 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
     private let character: RMCharacter
     private let detailView: RMCharacterDetailView
     private let loadingView: LoadingView
-    private var episodeViewModel = RMEpisodeViewModel()
+    private var episodeViewModel = RMEpisodeDetailViewModel()
     private var cancellables = Set<AnyCancellable>()
     
-    var sections: [SectionType] = []
+    var sections: [RMCharacterSection] = []
     
     init(character: RMCharacter, viewModel: RMCharacterViewModel) {
         self.character = character
@@ -71,11 +71,13 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
         viewModel.$characterDetail
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.handleState(state)
+                
+                    self?.handleState(state)
+                
             }
             .store(in: &cancellables)
         
-        episodeViewModel.$episodes
+        episodeViewModel.$episodeDetailList
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 switch state.state {
@@ -89,16 +91,21 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
             .store(in: &cancellables)
     }
 
-    private func handleState(_ state: RMDataWrapper<RMCharacter>) {
+    private func handleState(_ state: RMDataWrapper<RMCharacter?>) {
         switch state.state {
         case .loading(_):
             loadingView.show()
+            break
         case .success:
-            guard let episodes = state.data?.episode else { return }
-            episodeViewModel.fetchEpisodeDetails(episodeURLs: episodes)
-            createSections(state.data)
+            guard let episodes = state.data??.episode else { return }
+            episodeViewModel.fetchEpisodeGroupedURL(episodeURLs: episodes)
+            if let data = state.data{
+                createSections(state.data as! RMCharacter)
+            }
+            break
         case .noData, .error:
             loadingView.hide()
+            break
         default:
             break
         }
@@ -107,8 +114,8 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
     private func createSections(_ character: RMCharacter?) {
         guard let character = character else { return }
 
-        let photoSection: SectionType = .photo(image: character.image)
-        let informationSection: SectionType = .information(data: [
+        let photoSection: RMCharacterSection = .photo(image: character.image)
+        let informationSection: RMCharacterSection = .characterInfo(data: [
             (type: .status, value: character.status.rawValue),
             (type: .gender, value: character.gender.rawValue),
             (type: .type, value: character.type.isEmpty ? "N/A" : character.type),
@@ -141,7 +148,7 @@ extension RMCharacterDetailViewController: UICollectionViewDataSource {
         switch sections[section] {
         case .photo:
             return 1
-        case .information(let data):
+        case .characterInfo(let data):
             return data.count
         case .episode(let episodes):
             return episodes.count
@@ -159,7 +166,7 @@ extension RMCharacterDetailViewController: UICollectionViewDataSource {
             cell.configure(with: image)
             return cell
             
-        case .information(let data):
+        case .characterInfo(let data):
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMCharacterInfoCollectionViewCell.cellIdentifer, for: indexPath) as? RMCharacterInfoCollectionViewCell else {
                 fatalError("Failed to dequeue RMCharacterInfoCollectionViewCell")
             }
@@ -184,13 +191,13 @@ extension RMCharacterDetailViewController {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let section = sections[indexPath.section]
         switch section {
-        case .photo, .information:
+        case .photo, .characterInfo:
             break
         case .episode(let episodes):
             let selectedEpisode = episodes[indexPath.row]
             print(selectedEpisode)
 
-            let vc = RMEpisodeViewController()
+            let vc = RMEpisodeDetailViewController(episode: selectedEpisode as! RMEpisode)
             navigationController?.pushViewController(vc, animated: true)
         }
     }
