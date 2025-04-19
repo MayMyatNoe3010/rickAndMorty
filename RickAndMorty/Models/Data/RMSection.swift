@@ -16,3 +16,9 @@ enum RMEpisodeSection{
     case episodeInfo(data: [(title: String, value: String)])
     case character(character: [RMCharacterDataRender])
 }
+
+enum RMLocationSection{
+    case locationInfo(data: [(title: String, value: String)])
+    case character(character: [RMCharacterDataRender])
+}
+

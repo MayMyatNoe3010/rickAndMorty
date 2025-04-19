@@ -14,3 +14,16 @@ extension UIView{
         })
     }
 }
+
+extension UIScrollView {
+    func handleLoadMore(thresholdOffset: CGFloat = 0, onLoadMore: () -> Void) {
+        let offset = self.contentOffset.y
+        let totalContentHeight = self.contentSize.height
+        let totalScrollViewFixedHeight = self.frame.size.height
+
+        if offset >= (totalContentHeight - totalScrollViewFixedHeight - thresholdOffset) {
+            onLoadMore()
+        }
+    }
+}
+

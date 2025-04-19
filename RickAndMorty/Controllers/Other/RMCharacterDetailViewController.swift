@@ -11,18 +11,16 @@ import Combine
 
 final class RMCharacterDetailViewController: UIViewController, UICollectionViewDelegate {
     
-    private let viewModel: RMCharacterViewModel
+    private let viewModel = RMCharacterDetailViewModel()
     private let character: RMCharacter
     private let detailView: RMCharacterDetailView
     private let loadingView: LoadingView
-    private var episodeViewModel = RMEpisodeDetailViewModel()
     private var cancellables = Set<AnyCancellable>()
     
     var sections: [RMCharacterSection] = []
     
     init(character: RMCharacter, viewModel: RMCharacterViewModel) {
         self.character = character
-        self.viewModel = viewModel
         self.detailView = RMCharacterDetailView(frame: .zero)
         self.loadingView = LoadingView(frame: .zero)
         super.init(nibName: nil, bundle: nil)
@@ -42,7 +40,7 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
         detailView.setDelegateAndDataSource(delegate: self, dataSource: self)
         setupUI()
         bindViewModel()
-        viewModel.getCharacterDetail(url: character.url)
+        viewModel.startCharacterSection(for: character)
     }
 
     @objc
@@ -68,7 +66,7 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
     }
 
     private func bindViewModel() {
-        viewModel.$characterDetail
+        viewModel.$characterDetailSection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 
@@ -77,31 +75,17 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
             }
             .store(in: &cancellables)
         
-        episodeViewModel.$episodeDetailList
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                switch state.state {
-                case .success:
-                    self?.appendEpisodesToSections(state.data)
-                    self?.loadingView.hide()
-                default:
-                    break
-                }
-            }
-            .store(in: &cancellables)
     }
 
-    private func handleState(_ state: RMDataWrapper<RMCharacter?>) {
+    private func handleState(_ state: RMDataWrapper<[RMCharacterSection]>) {
         switch state.state {
         case .loading(_):
             loadingView.show()
             break
         case .success:
-            guard let episodes = state.data??.episode else { return }
-            episodeViewModel.fetchEpisodeGroupedURL(episodeURLs: episodes)
-            if let data = state.data{
-                createSections(state.data as! RMCharacter)
-            }
+            loadingView.hide()
+            sections = state.data ?? []
+            detailView.configure(with: state.data ?? [])
             break
         case .noData, .error:
             loadingView.hide()
@@ -111,30 +95,7 @@ final class RMCharacterDetailViewController: UIViewController, UICollectionViewD
         }
     }
 
-    private func createSections(_ character: RMCharacter?) {
-        guard let character = character else { return }
-
-        let photoSection: RMCharacterSection = .photo(image: character.image)
-        let informationSection: RMCharacterSection = .characterInfo(data: [
-            (type: .status, value: character.status.rawValue),
-            (type: .gender, value: character.gender.rawValue),
-            (type: .type, value: character.type.isEmpty ? "N/A" : character.type),
-            (type: .species, value: character.species),
-            (type: .origin, value: character.origin.name),
-            (type: .location, value: character.location.name),
-            (type: .created, value: character.created),
-            (type: .episodeCount, value: "\(character.episode.count)")
-        ])
-        
-        sections = [photoSection, informationSection]
-    }
-
-    private func appendEpisodesToSections(_ episodes: [RMEpisode]?) {
-        guard let episodes = episodes else { return }
-        sections.append(.episode(episode: episodes))
-        loadingView.hide()
-        detailView.configure(with: sections)
-    }
+    
 }
 
 // MARK: - UICollectionViewDataSource

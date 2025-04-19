@@ -9,30 +9,26 @@ import Foundation
 import Combine
 
 class RMEpisodeViewModel: BaseViewModel{
-
+    
     @Published var episode: RMDataWrapper<RMEpisode> = RMDataWrapper.idle()
     
     @Published var allEpisodes: RMDataWrapper<[RMEpisode]?> = RMDataWrapper.idle()
-   
+    
     private var cancellables = Set<AnyCancellable>()
-    private let characterViewModel =  RMCharacterViewModel()
     var episodeInfo: Info? = nil
     
-    
-    
-
     func getEpisode(episodeURL: String?){
         guard let urlString = episodeURL, let url = URL(string: urlString), let request = RMRequest(url: url) else {
-                    print("Invalid episode URL")
-                    return
-                }
-
+            print("Invalid episode URL")
+            return
+        }
+        
         Task{
             await executeServiceCall(serviceCall: {
                 try await self.fetchData(request: request, expecting: RMEpisode.self)!
             }, onStateChanged: {[weak self] state, _ in
-
-                    self?.episode = state
+                
+                self?.episode = state
                 
             }, mapResponse: { response in
                 return (response, nil)
@@ -50,10 +46,10 @@ class RMEpisodeViewModel: BaseViewModel{
                         expecting: RMGetAllEpisodesResponse.self
                     )                },
                 onStateChanged: { [weak self] dataWrapper, info in
-
-                        self?.allEpisodes = dataWrapper
                     
-                        self?.episodeInfo = info
+                    self?.allEpisodes = dataWrapper
+                    
+                    self?.episodeInfo = info
                     
                 },
                 mapResponse: { response in
@@ -84,16 +80,16 @@ class RMEpisodeViewModel: BaseViewModel{
                 onStateChanged: { [weak self] dataWrapper, info in
                     //print("Daata: \(dataWrapper)")
                     
-                        if let newEpisodes = dataWrapper.data {
-                            var existingEpisodes = self?.allEpisodes.data ?? []  // Get existing data or empty array
-                            existingEpisodes?.append(contentsOf: newEpisodes)  // Append new episodes
-                            
-                            self?.allEpisodes = RMDataWrapper.success(existingEpisodes)
-                        }
-                        print("Updaate:\(self?.allEpisodes.data??.count)")
+                    if let newEpisodes = dataWrapper.data {
+                        var existingEpisodes = self?.allEpisodes.data ?? []  // Get existing data or empty array
+                        existingEpisodes?.append(contentsOf: newEpisodes)  // Append new episodes
                         
-                        self?.episodeInfo = info
-                        
+                        self?.allEpisodes = RMDataWrapper.success(existingEpisodes)
+                    }
+                    print("Updaate:\(self?.allEpisodes.data??.count)")
+                    
+                    self?.episodeInfo = info
+                    
                     
                 },
                 mapResponse: { response in
@@ -107,7 +103,4 @@ class RMEpisodeViewModel: BaseViewModel{
     public var isLoadMore: Bool{
         return episodeInfo?.next != nil
     }
-    
-    
-
 }

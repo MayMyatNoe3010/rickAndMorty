@@ -1,5 +1,5 @@
 //
-//  RMEpisodeDetailViewController.swift
+//  RMLocationDetailViewController.swift
 //  RickAndMorty
 //
 //  Created by User on 10/04/2025.
@@ -9,19 +9,19 @@ import Foundation
 import UIKit
 import Combine
 
-final class RMEpisodeDetailViewController : UIViewController, UICollectionViewDelegate{
+final class RMLocationDetailViewController : UIViewController, UICollectionViewDelegate{
     
     
-    private let episode: RMEpisode
-    private let detailView: RMEpisodeDetailView
+    private let location: RMLocation
+    private let detailView: RMLocationDetailView
     private let loadingView: LoadingView
     private var cancellables = Set<AnyCancellable>()
-    private let viewModel = RMEpisodeDetailViewModel()
-    private var sections: [RMEpisodeSection] = []
+    private let viewModel = RMLocationDetailViewModel()
+    private var sections: [RMLocationSection] = []
     
-    init(episode: RMEpisode){
-        self.episode = episode
-        self.detailView = RMEpisodeDetailView(frame: .zero)
+    init(location: RMLocation){
+        self.location = location
+        self.detailView = RMLocationDetailView(frame: .zero)
         self.loadingView = LoadingView(frame: .zero)
         super.init(nibName: nil, bundle: nil)
     }
@@ -31,12 +31,12 @@ final class RMEpisodeDetailViewController : UIViewController, UICollectionViewDe
     }
     
     override func viewDidLoad() {
-        title = episode.name
+        title = location.name
         view.backgroundColor = .systemBackground
         detailView.setDelegateAndDataSource(delegate: self, dataSource: self)
         setupUI()
         observeViewModel()
-        viewModel.startEpisodeSection(for: episode)
+        viewModel.startLocationSection(for: location)
     }
     private func setupUI() {
         detailView.translatesAutoresizingMaskIntoConstraints = false
@@ -55,14 +55,14 @@ final class RMEpisodeDetailViewController : UIViewController, UICollectionViewDe
         loadingView.hide()
     }
     private func observeViewModel(){
-        viewModel.$episodeDetailSection
+        viewModel.$locationDetailSection
             .receive(on: DispatchQueue.main)
             .sink{[weak self] state in
                 self?.handleState(state)
             }
             .store(in: &cancellables)
     }
-    private func handleState(_ state: RMDataWrapper<[RMEpisodeSection]>){
+    private func handleState(_ state: RMDataWrapper<[RMLocationSection]>){
         
         switch(state.state){
             
@@ -83,7 +83,7 @@ final class RMEpisodeDetailViewController : UIViewController, UICollectionViewDe
     
 }
 
-extension RMEpisodeDetailViewController : UICollectionViewDataSource{
+extension RMLocationDetailViewController : UICollectionViewDataSource{
     
         func numberOfSections(in collectionView: UICollectionView) -> Int {
             print("Count: \(sections.count)")
@@ -96,7 +96,7 @@ extension RMEpisodeDetailViewController : UICollectionViewDataSource{
         }
 
         switch sections[section]{
-        case .episodeInfo(let data): return data.count
+        case .locationInfo(let data): return data.count
         case .character(let character): return character.count
         }
     }
@@ -113,7 +113,7 @@ extension RMEpisodeDetailViewController : UICollectionViewDataSource{
             cell.configure(with: info as! RMCharacter )
             return cell
             
-        case .episodeInfo(let data):
+        case .locationInfo(let data):
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RMEpisodeInfoCollectionViewCell.cellIdentifier, for: indexPath) as? RMEpisodeInfoCollectionViewCell else {
                 fatalError("Failed to dequeue CollectionViewCell")
             }

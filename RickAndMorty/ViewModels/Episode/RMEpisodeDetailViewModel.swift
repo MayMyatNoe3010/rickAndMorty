@@ -49,8 +49,10 @@ class RMEpisodeDetailViewModel: BaseViewModel{
                         switch state.state {
                         case .loading:
                             self?.episodeDetailSection = RMDataWrapper.loading("Loading")
+                            
                         case .success:
                             self?.createEpisodeSections(for: episode, characters: state.data ?? [])
+                            
                         default:
                             break
                         }

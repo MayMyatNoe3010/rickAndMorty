@@ -117,6 +117,9 @@ extension RMEpisodeListView: UICollectionViewDelegateFlowLayout{
 }
 extension RMEpisodeListView: UIScrollViewDelegate{
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        delegate?.didScroll(scrollView)
+        scrollView.handleLoadMore {
+            delegate?.didScroll(scrollView)
+        }
+        
     }
 }

@@ -49,8 +49,8 @@ class RMCharacterEpisodeCollectionViewCell: UICollectionViewCell {
     
     func configure(with data: RMEpisodeDataRender){
         lbName.text = data.name
-        lbSeason.text = "Episode "+data.episode
-        lbAirDate.text = data.air_date
+        lbSeason.text = "Episode: "+data.episode
+        lbAirDate.text = "Aired Date: "+data.air_date
     }
     
     private func setupUI(){

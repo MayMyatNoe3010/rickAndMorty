@@ -100,9 +100,9 @@ final class RMEpisodeViewController: BaseViewController, RMEpisodeListDelegate, 
     }
     
     func didScroll(_ scrollView: UIScrollView) {
-        handleScrollView(scrollView: scrollView){
+        
             didLoadMoreEpisodes()
-        }
+        
     }
 
 

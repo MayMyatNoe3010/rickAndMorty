@@ -16,3 +16,10 @@ struct RMLocation: Codable {
     let url: String
     let created: String
 }
+protocol RMLocationDataRender{
+    var name: String { get }
+    var type: String{get}
+    var dimension: String{get}
+    
+}
+extension RMLocation: RMLocationDataRender{}
